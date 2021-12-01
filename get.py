@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+"""Retrieve input for a provided day in Advent of Code."""
 import argparse
 import os
 import sys
 
 import requests
 
+# Instuctions on retrieving your session key for use with this script:
+# https://github.com/wimglenn/advent-of-code-wim/issues/1
 
 def parse_arguments():
     """Parse command-line arguments using argparse."""
