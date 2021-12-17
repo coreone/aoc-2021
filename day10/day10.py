@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """AoC: Day 10."""
 import sys
-# import pdb
 
 
 class InvalidLine(BaseException):
@@ -26,7 +25,9 @@ def get_input(file):
 def validate(line):
     """Validate the chunks in a line."""
     pairs = {"(": ")", "[": "]", "{": "}", "<": ">"}
+    incomplete_scores = {")": 1, "]": 2, "}": 3, ">": 4}
     tracker = []
+    inv_points = 0
 
     for char in line:
         if char in pairs:
@@ -34,47 +35,62 @@ def validate(line):
         else:
             if char != tracker.pop():
                 raise InvalidLine(char)
-        # print(tracker)
 
     if len(tracker) > 0:
-        raise IncompleteLine(len(tracker))
+        while len(tracker) > 0:
+            inv_points *= 5
+            char = tracker.pop()
+            inv_points += incomplete_scores[char]
+        raise IncompleteLine(inv_points)
 
     return True
 
 
-def solution1(lines):
+def sorted_insert(array, new_value):
+    """Insert a value into a sorted list."""
+    newlist = []
+    if not array:
+        return [new_value]
+
+    inserted = False
+    for value in array:
+        if new_value < value and not inserted:
+            newlist.append(new_value)
+            inserted = True
+        newlist.append(value)
+
+    if not inserted:
+        newlist.append(new_value)
+
+    return newlist
+
+
+def solution(lines):
     """Find solution 1."""
     points = {")": 3, "]": 57, "}": 1197, ">": 25137}
-    total = 0
+    invalid_total = 0
+    incomplete_totals = []
 
     for line in lines:
         try:
             validate(line)
         except InvalidLine as exc:
             char = str(exc)
-            total += points[char]
-            print(f"invalid: {line}: {char}")
-        except IncompleteLine:
-            print("incomplete")
-            continue
+            invalid_total += points[char]
+        except IncompleteLine as exc:
+            inc = int(str(exc))
+            incomplete_totals = sorted_insert(incomplete_totals, inc)
 
-    return total
-
-
-def solution2(lines):
-    """Find solution 2."""
-
-    return 0
+    index = int(len(incomplete_totals) / 2)
+    return (invalid_total, incomplete_totals[index])
 
 
 def main():
     """Execute the script."""
     lines = get_input("input.txt")
-    # lines = get_input("j")
-    answer = solution1(lines)
-    print(f"Problem 1: answer: {answer}")
-    answer = solution2(lines)
-    print(f"Problem 2: answer = {answer}")
+    (answer1, answer2) = solution(lines)
+    print(f"Problem 1: answer: {answer1}")
+    print(f"Problem 2: answer = {answer2}")
 
     return 0
 
